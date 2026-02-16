@@ -287,7 +287,7 @@ protected:
                 painter.translate(r.x, r.y);
 
                 // поворот ракеты по направлению
-                float angle = atan2(r.vy, r.vx) * 180 / M_PI;
+                float angle = atan2(r.vy, r.vx) * 90 / M_PI;
                 painter.rotate(angle);
 
                 QPointF center(rocketSprite.width() / 2.0, rocketSprite.height() / 2.0);
@@ -703,12 +703,12 @@ protected:
                 r.x = posX + cos(rad) * 50;
                 r.y = posY + sin(rad) * 50;
 
-                // начальная скорость - в сторону цели
+                // сразу летит прямо к цели
                 float dx = nearest->x - r.x;
                 float dy = nearest->y - r.y;
                 float dist = sqrt(dx*dx + dy*dy);
 
-                float rocketSpeed = 50.0f;
+                float rocketSpeed = 15.0f;
                 r.vx = (dx / dist) * rocketSpeed;
                 r.vy = (dy / dist) * rocketSpeed;
 
@@ -915,15 +915,15 @@ private slots:
 
         // движение ракет
         for (int i = rockets.size() - 1; i >= 0; i--) {
-            Rocket &r = rockets[i];
+    Rocket &r = rockets[i];
 
-            // если цель жива — наводимся
-            if (r.target && r.target->alive) {
+    // если цель жива — наводимся
+    if (r.target && r.target->alive) {
                 float dx = r.target->x - r.x;
                 float dy = r.target->y - r.y;
                 float dist = sqrt(dx*dx + dy*dy);
 
-                if (dist < 15) {
+                if (dist < 20) {  // попадание
                     r.target->hp -= 5;
                     hitMarkers.append({r.target->x, r.target->y, 15});
 
@@ -936,14 +936,9 @@ private slots:
                     continue;
                 }
 
-                // плавное наведение
-                float speed = 8.0f;
-                float targetVx = (dx / dist) * speed;
-                float targetVy = (dy / dist) * speed;
-
-                // инерция
-                r.vx = r.vx * 0.95f + targetVx * 0.05f;
-                r.vy = r.vy * 0.95f + targetVy * 0.05f;
+                float speed = 15.0f;  // скорость ракеты
+                r.vx = (dx / dist) * speed;
+                r.vy = (dy / dist) * speed;
             }
 
             r.x += r.vx;
