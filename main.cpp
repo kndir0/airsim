@@ -118,14 +118,14 @@ public:
 
         su34Sprite.load("plane2.png");
         if (!su34Sprite.isNull()) {
-            su34Sprite = su34Sprite.scaled(95, 95, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            qDebug() << "СУ-34 загружен с размером 90x90!";
+            su34Sprite = su34Sprite.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            qDebug() << "СУ-34 загружен!";
         }
 
         su57Sprite.load("plane3.png");
         if (!su57Sprite.isNull()) {
             su57Sprite = su57Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            qDebug() << "СУ-57 загружен (90x90)!";
+            qDebug() << "СУ-57 загружен!";
         }
 
         // загрузка текстуры травы
