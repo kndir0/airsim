@@ -87,7 +87,7 @@ class AirplaneGame : public QWidget
 public:
     AirplaneGame(QWidget *parent = nullptr)
         : QWidget(parent),
-          posX(8000), posY(8000),
+          posX(7850), posY(8000),
           velocity(0, 0),
           angle(0),
           thrust(0),
@@ -112,13 +112,13 @@ public:
         // загрузка базового самолёта
         planeSprite.load("plane.png");
         if (!planeSprite.isNull()) {
-            planeSprite = planeSprite.scaled(75, 75, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            planeSprite = planeSprite.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             qDebug() << "самолёт загружен!";
         }
 
         su34Sprite.load("plane2.png");
         if (!su34Sprite.isNull()) {
-            su34Sprite = su34Sprite.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            su34Sprite = su34Sprite.scaled(120, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             qDebug() << "СУ-34 загружен!";
         }
 
@@ -529,9 +529,9 @@ protected:
             float dy = t.y - posY;
 
             float dist = sqrt(dx*dx + dy*dy);
-            if (dist < 4000) {
-                float radarX = (dx / 4000) * 50;
-                float radarY = (dy / 4000) * 50;
+            if (dist < 6000) {
+                float radarX = (dx / 6000) * 50;
+                float radarY = (dy / 6000) * 50;
 
                 if (t.type == 2) {
                     painter.setBrush(Qt::red);
@@ -708,7 +708,7 @@ protected:
                 float dy = nearest->y - r.y;
                 float dist = sqrt(dx*dx + dy*dy);
 
-                float rocketSpeed = 15.0f;
+                float rocketSpeed = 50.0f;
                 r.vx = (dx / dist) * rocketSpeed;
                 r.vy = (dy / dist) * rocketSpeed;
 
@@ -752,7 +752,7 @@ private slots:
         if (angle < 0) angle += 360;
 
         if (thrust > 0 && fuel > 0 && !onGround) {
-            fuel -= 0.02f;
+            fuel -= 0.01f;
             if (fuel < 0) fuel = 0;
         }
 
@@ -899,7 +899,7 @@ private slots:
             money += 50;
             saveMoney();
 
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 20; i++) {
                 float x = 1000 + rand() % 6000;
                 float y = 1000 + rand() % 6000;
                 targets.append(Target(x, y, (rand() % 2 == 0) ? 0 : 2));
@@ -910,7 +910,7 @@ private slots:
 
         if (!onGround) {
             trail.push_back(QPointF(posX, posY));
-            if (trail.size() > 100) trail.removeFirst();
+            if (trail.size() > 300) trail.removeFirst();
         }
 
         // движение ракет
@@ -936,7 +936,7 @@ private slots:
                     continue;
                 }
 
-                float speed = 15.0f;  // скорость ракеты
+                float speed = 50.0f;  // скорость ракеты
                 r.vx = (dx / dist) * speed;
                 r.vy = (dy / dist) * speed;
             }
