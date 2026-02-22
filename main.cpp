@@ -63,7 +63,7 @@ struct EnemyPlane {
     float vx, vy;
     float angle;
     int hp;
-    int type;  // 0 - Eurofighter, 1 - F-14
+    int type;  // 0 - Eurofighter, 1 - F-18
     bool alive;
     int shootTimer;
 
@@ -102,20 +102,30 @@ public:
           airfield(8000, 8000),
           shopOpen(false),
           selectedSkin(0),
-          currentPlane(0)
+          currentPlane(0),
+          landingMenuOpen(false),
+          landingChoice(0),
+          hydraulicFailure(false),
+          hydraulicTimer(0)
     {
-        setFixedSize(1920, 900);
+        resize(1920, 900);
+        setMinimumSize(800, 600);
         setWindowTitle("airsim");
 
         // загрузка спрайтов игрока
         su27Sprite.load("plane.png");
         if (!su27Sprite.isNull()) {
-            su27Sprite = su27Sprite.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            su27Sprite = su27Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         su30Sprite.load("plane1.png");
         if (!su30Sprite.isNull()) {
-            su30Sprite = su30Sprite.scaled(85, 85, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            su30Sprite = su30Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+
+        su33Sprite.load("plane6.png");
+        if (!su33Sprite.isNull()) {
+            su33Sprite = su33Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         su25Sprite.load("plane4.png");
@@ -131,6 +141,11 @@ public:
         su57Sprite.load("plane3.png");
         if (!su57Sprite.isNull()) {
             su57Sprite = su57Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+
+        mig31Sprite.load("plane5.png");
+        if (!mig31Sprite.isNull()) {
+            mig31Sprite = mig31Sprite.scaled(110, 110, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         // загрузка вражеских спрайтов
@@ -177,30 +192,32 @@ public:
         // настройка магазина
         skins.append({"СУ-27", 0, 2, 0, 0, 3.0f, true, "plane.png"});
         skins.append({"СУ-30", 2000, 3, 10, 0, 3.0f, false, "plane1.png"});
+        skins.append({"СУ-33", 2500, 3, 15, 30, 3.5f, false, "plane6.png"});
         skins.append({"СУ-34", 3000, 3, 15, 40, 2.5f, false, "plane2.png"});
-        skins.append({"СУ-25", 3500, 2, 25, 50, 2.0f, false, "plane4.png"});
+        skins.append({"СУ-25", 3500, 2, 25, 50, 2.5f, false, "plane4.png"});
         skins.append({"СУ-57", 5000, 5, 20, 60, 4.0f, false, "plane3.png"});
+        skins.append({"МиГ-31", 10000, 10, 20, 70, 3.0f, false, "plane5.png"});
 
         loadMoney();
         loadHangar();
 
         // генерация мира
-        for (int i = 0; i < 20; i++) {
-            float x = 2000 + rand() % 12000;
-            float y = 2000 + rand() % 12000;
+        for (int i = 0; i < 10; i++) {
+            float x = 1000 + rand() % 15000;
+            float y = 1000 + rand() % 15000;
             targets.append(Target(x, y, (rand() % 2 == 0) ? 0 : 2));
         }
 
-        // генерация вражеских самолётов (Eurofighter и F-18)
-        for (int i = 0; i < 20; i++) {
-            float x = 3000 + rand() % 10000;
-            float y = 3000 + rand() % 10000;
+        // генерация вражеских самолётов
+        for (int i = 0; i < 4; i++) {
+            float x = 1000 + rand() % 2000;
+            float y = 1000 + rand() % 2000;
             enemies.append(EnemyPlane(x, y, rand() % 2));
         }
 
         for (int i = 0; i < 1000; i++) {
-            float x = 1000 + rand() % 14000;
-            float y = 1000 + rand() % 14000;
+            float x = 1000 + rand() % 15000;
+            float y = 1000 + rand() % 15000;
             trees.append(QPointF(x, y));
         }
 
@@ -343,6 +360,7 @@ protected:
             painter.drawEllipse(i, -45, 7, 7);
             painter.drawEllipse(i, 55, 7, 7);
         }
+
         painter.restore();
 
         // цели
@@ -408,14 +426,20 @@ protected:
         if (currentPlane == 1 && !su30Sprite.isNull()) {
             currentSprite = &su30Sprite;
         }
-        else if (currentPlane == 2 && !su34Sprite.isNull()) {
+        else if (currentPlane == 2 && !su33Sprite.isNull()) {
+            currentSprite = &su33Sprite;
+        }
+        else if (currentPlane == 3 && !su34Sprite.isNull()) {
             currentSprite = &su34Sprite;
         }
-        else if (currentPlane == 3 && !su25Sprite.isNull()) {
+        else if (currentPlane == 4 && !su25Sprite.isNull()) {
             currentSprite = &su25Sprite;
         }
-        else if (currentPlane == 4 && !su57Sprite.isNull()) {
+        else if (currentPlane == 5 && !su57Sprite.isNull()) {
             currentSprite = &su57Sprite;
+        }
+        else if (currentPlane == 6 && !mig31Sprite.isNull()) {
+            currentSprite = &mig31Sprite;
         }
 
         QPointF center(currentSprite->width() / 2.0, currentSprite->height() / 2.0);
@@ -433,6 +457,60 @@ protected:
         painter.resetTransform();
 
         drawRadar(painter);
+
+        // меню после посадки
+        if (landingMenuOpen) {
+            painter.save();
+            painter.resetTransform();
+
+            painter.fillRect(rect(), QColor(0, 0, 0, 200));
+
+            painter.setPen(Qt::white);
+            painter.setFont(QFont("Arial", 24, QFont::Bold));
+            painter.drawText(rect().adjusted(0, -100, 0, 0), Qt::AlignHCenter, "ВЫБЕРИТЕ ДЕЙСТВИЕ");
+
+            painter.setFont(QFont("Arial", 18));
+
+            if (landingChoice == 0) {
+                painter.setPen(Qt::green);
+                painter.drawText(rect().adjusted(0, 0, 0, 0), Qt::AlignHCenter, "▶ СВОБОДНЫЙ ПОЛЁТ");
+            } else {
+                painter.setPen(Qt::white);
+                painter.drawText(rect().adjusted(0, 0, 0, 0), Qt::AlignHCenter, "   СВОБОДНЫЙ ПОЛЁТ");
+            }
+
+            if (landingChoice == 1) {
+                painter.setPen(Qt::green);
+                painter.drawText(rect().adjusted(0, 50, 0, 0), Qt::AlignHCenter, "▶ НОВАЯ МИССИЯ");
+            } else {
+                painter.setPen(Qt::white);
+                painter.drawText(rect().adjusted(0, 50, 0, 0), Qt::AlignHCenter, "   НОВАЯ МИССИЯ");
+            }
+
+            painter.setPen(Qt::gray);
+            painter.setFont(QFont("Arial", 14));
+            painter.drawText(rect().adjusted(0, 150, 0, 0), Qt::AlignHCenter, "↑/↓ - выбор, ENTER - подтвердить");
+
+            painter.restore();
+        }
+
+        // сообщение об отказе гидросистем
+        if (hydraulicFailure && hydraulicTimer > 0) {
+            painter.save();
+            painter.resetTransform();
+
+            painter.setPen(Qt::red);
+            painter.setFont(QFont("Arial", 24, QFont::Bold));
+            painter.drawText(rect().adjusted(0, -200, 0, 0), Qt::AlignHCenter, "⚠ ОТКАЗ ГИДРОСИСТЕМ ⚠");
+
+            painter.setFont(QFont("Arial", 14));
+            painter.setPen(Qt::white);
+            painter.drawText(rect().adjusted(0, -150, 0, 0), Qt::AlignHCenter, "управление критически затруднено");
+
+            hydraulicTimer--;
+
+            painter.restore();
+        }
 
         if (shopOpen) {
             drawShop(painter);
@@ -620,7 +698,7 @@ protected:
 
         painter.setPen(Qt::white);
         painter.setFont(QFont("Arial", 12));
-        painter.drawText(300, 570, "M - выход, ↑/↓ - выбор, ENTER - купить/выбрать");
+        painter.drawText(rect().adjusted(0, 50, 0, 0), Qt::AlignHCenter, "M - выход, ↑/↓ - выбор, ENTER - купить/выбрать");
     }
 
     void keyPressEvent(QKeyEvent *event) override {
@@ -732,6 +810,54 @@ protected:
             r.timer = 200;
             rockets.append(r);
         }
+
+        if (landingMenuOpen) {
+            if (event->key() == Qt::Key_Up) {
+                landingChoice = 0;
+                update();
+                return;
+            }
+            if (event->key() == Qt::Key_Down) {
+                landingChoice = 1;
+                update();
+                return;
+            }
+            if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+                if (landingChoice == 0) {
+                    fuel = 100;
+                    bombs = 50 + skins[currentPlane].bombBonus;
+                    armor = 100 + skins[currentPlane].armorBonus;
+                    money += 50;
+                    saveMoney();
+                    landingMenuOpen = false;
+                } else {
+                    fuel = 100;
+                    bombs = 50 + skins[currentPlane].bombBonus;
+                    armor = 100 + skins[currentPlane].armorBonus;
+                    money += 50;
+                    saveMoney();
+
+                    targets.clear();
+                    enemies.clear();
+
+                    for (int i = 0; i < 10; i++) {
+                        float x = 1000 + rand() % 15000;
+                        float y = 1000 + rand() % 15000;
+                        targets.append(Target(x, y, (rand() % 2 == 0) ? 0 : 2));
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        float x = 1000 + rand() % 2000;
+                        float y = 1000 + rand() % 2000;
+                        enemies.append(EnemyPlane(x, y, rand() % 2));
+                    }
+
+                    landingMenuOpen = false;
+                }
+                update();
+                return;
+            }
+            return;
+        }
     }
 
     void keyReleaseEvent(QKeyEvent *event) override {
@@ -751,15 +877,22 @@ private slots:
     void updateGame() {
         if (shopOpen) return;
 
-        int speedBonus = skins[currentPlane].speedBonus;
+        // проверка отказа гидросистем
+        if (armor <= 30 && armor > 0 && !hydraulicFailure) {
+            hydraulicFailure = true;
+            hydraulicTimer = 120;  // 2 секунды
+        }
+
+        // если отказ есть, сбрасываем бонусы
+        int speedBonus = hydraulicFailure ? 0 : skins[currentPlane].speedBonus;
         int armorBonus = skins[currentPlane].armorBonus;
+        float turnSpeed = hydraulicFailure ? 1.0f : skins[currentPlane].turnSpeed;
 
         if (keyW) thrust = std::min(thrust + 0.1f, 5.0f + speedBonus);
         if (keyS) thrust = std::max(thrust - 0.1f, 0.0f);
 
-        float currentTurnSpeed = skins[currentPlane].turnSpeed;
-        if (keyA) angle -= currentTurnSpeed;
-        if (keyD) angle += currentTurnSpeed;
+        if (keyA) angle -= turnSpeed;
+        if (keyD) angle += turnSpeed;
         if (angle >= 360) angle -= 360;
         if (angle < 0) angle += 360;
 
@@ -831,6 +964,7 @@ private slots:
                     money = 0;
                     bombs = 50;
                     fuel = 100;
+                    hydraulicFailure = false;
                     saveMoney();
                 }
                 continue;
@@ -841,47 +975,55 @@ private slots:
             }
         }
 
-        // ЛОГИКА ВРАЖЕСКИХ САМОЛЁТОВ
+        for (int i = AABullets.size() - 1; i >= 0; i--) {
+            AABullet &b = AABullets[i];
+
+            for (EnemyPlane &e : enemies) {
+                if (!e.alive) continue;
+                float distToEnemy = sqrt(pow(b.x - e.x, 2) + pow(b.y - e.y, 2));
+                if (distToEnemy < 15) {
+                    e.hp -= 1;
+                    hitMarkers.append({e.x, e.y, 10});
+                    if (e.hp <= 0) {
+                        e.alive = false;
+                    }
+                    AABullets.removeAt(i);
+                    break;
+                }
+            }
+        }
+
         for (EnemyPlane &e : enemies) {
             if (!e.alive) continue;
 
-            // вектор к игроку
             float dx = posX - e.x;
             float dy = posY - e.y;
             float dist = sqrt(dx*dx + dy*dy);
 
-            if (dist < 1200) {  // заметили игрока
-                // целевой угол
+            if (dist < 1200) {
                 float targetAngle = atan2(dy, dx) * 180 / M_PI;
-
-                // плавно поворачиваем к цели
                 float angleDiff = targetAngle - e.angle;
                 while (angleDiff > 180) angleDiff -= 360;
                 while (angleDiff < -180) angleDiff += 360;
 
-                // скорость поворота
                 float turnSpeed = 5.0f;
                 if (angleDiff > turnSpeed) angleDiff = turnSpeed;
                 if (angleDiff < -turnSpeed) angleDiff = -turnSpeed;
                 e.angle += angleDiff;
 
-                // ускоряемся к цели
                 float targetSpeed = 8.5f;
                 float rad = e.angle * M_PI / 180.0f;
                 QVector2D direction(cos(rad), sin(rad));
 
-                // добавляем ускорение
                 e.vx += direction.x() * 0.1f;
                 e.vy += direction.y() * 0.1f;
 
-                // ограничиваем максимальную скорость
                 float currentSpeed = sqrt(e.vx*e.vx + e.vy*e.vy);
                 if (currentSpeed > targetSpeed) {
                     e.vx = (e.vx / currentSpeed) * targetSpeed;
                     e.vy = (e.vy / currentSpeed) * targetSpeed;
                 }
 
-                // стрельба ракетами
                 e.shootTimer++;
                 if (e.shootTimer > 45 && dist < 700) {
                     e.shootTimer = 0;
@@ -891,7 +1033,6 @@ private slots:
                     r.x = e.x + cos(rad) * 30;
                     r.y = e.y + sin(rad) * 30;
 
-                    // ракета летит с учётом скорости врага
                     float rocketSpeed = 60.0f;
                     r.vx = e.vx + cos(rad) * rocketSpeed;
                     r.vy = e.vy + sin(rad) * rocketSpeed;
@@ -901,7 +1042,6 @@ private slots:
                     enemyRockets.append(r);
                 }
             } else {
-                // патрулируем с инерцией
                 e.angle += 0.5f;
                 float rad = e.angle * M_PI / 180.0f;
                 QVector2D direction(cos(rad), sin(rad));
@@ -916,15 +1056,12 @@ private slots:
                 }
             }
 
-            // применяем скорость
             e.x += e.vx;
             e.y += e.vy;
 
-            // сопротивление воздуха (как у игрока)
             e.vx *= 0.99f;
             e.vy *= 0.99f;
 
-            // границы
             if (e.x < 0) { e.x = 16000; e.vx = 0; }
             if (e.x > 16000) { e.x = 0; e.vx = 0; }
             if (e.y < 0) { e.y = 16000; e.vy = 0; }
@@ -949,6 +1086,7 @@ private slots:
                     money = 0;
                     bombs = 50;
                     fuel = 100;
+                    hydraulicFailure = false;
                     saveMoney();
                 }
                 continue;
@@ -1037,30 +1175,19 @@ private slots:
         onGround = (distToAirfield < 600 && velocity.length() < 3.0f);
 
         if (onGround && !wasOnGround) {
+            // ремонт и заправка
             fuel = 100;
             bombs = 50 + skins[currentPlane].bombBonus;
             armor = 100 + skins[currentPlane].armorBonus;
             money += 50;
+
+            // СБРАСЫВАЕМ ОТКАЗ ГИДРОСИСТЕМ ПРИ ПОСАДКЕ
+            hydraulicFailure = false;
+            hydraulicTimer = 0;
+
             saveMoney();
-
-            for (int i = 0; i < 20; i++) {
-                float x = 1000 + rand() % 6000;
-                float y = 1000 + rand() % 6000;
-                targets.append(Target(x, y, (rand() % 2 == 0) ? 0 : 2));
-            }
-
-            for (int i = 0; i < 20; i++) {
-                float x = 3000 + rand() % 10000;
-                float y = 3000 + rand() % 10000;
-                enemies.append(EnemyPlane(x, y, rand() % 2));
-            }
-        }
-
-        if (wasOnGround && velocity.length() > 3.0f) onGround = false;
-
-        if (!onGround) {
-            trail.push_back(QPointF(posX, posY));
-            if (trail.size() > 300) trail.removeFirst();
+            landingMenuOpen = true;
+            landingChoice = 0;
         }
     }
 
@@ -1115,11 +1242,20 @@ private:
     int selectedSkin, currentPlane;
     QList<QPointF> trail;
 
+    bool landingMenuOpen;
+    int landingChoice;
+
+    // отказ гидросистем
+    bool hydraulicFailure;
+    int hydraulicTimer;
+
     QPixmap su27Sprite;
     QPixmap su30Sprite;
+    QPixmap su33Sprite;
     QPixmap su25Sprite;
     QPixmap su34Sprite;
     QPixmap su57Sprite;
+    QPixmap mig31Sprite;
     QPixmap tankSprite;
     QPixmap rocketSprite;
     QPixmap AASprite;
