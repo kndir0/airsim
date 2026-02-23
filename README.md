@@ -83,7 +83,11 @@ Top-down military flight simulator. Buy planes, destroy tanks and AA, earn money
 
 ### Build (linux)
 ```bash
-g++ main.cpp -o airsim $(pkg-config --cflags --libs Qt5Widgets)
+rcc -name resources resources.qrc -o qrc_resources.cpp
+```
+
+```bash
+g++ main.cpp qrc_resources.cpp -o airsim $(pkg-config --cflags --libs Qt5Widgets)
 ```
 
 ## Build (windows)
