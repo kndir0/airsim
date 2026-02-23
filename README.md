@@ -31,7 +31,6 @@ Top-down military flight simulator. Buy planes, destroy tanks and AA, earn money
 | A | Turn left |
 | D | Turn right |
 | Space | Drop bomb |
-| F | Machine gun (hold) |
 | R | Fire guided missile (cost: $10) |
 | M | Open shop (on ground) |
 | ESC | Exit game |
