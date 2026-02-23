@@ -1,0 +1,19 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>plane.png</file>
+    <file>plane1.png</file>
+    <file>plane2.png</file>
+    <file>plane3.png</file>
+    <file>plane4.png</file>
+    <file>plane5.png</file>
+    <file>plane6.png</file>
+    <file>tank.png</file>
+    <file>AA.png</file>
+    <file>EF.png</file>
+    <file>f18.png</file>
+    <file>tree.png</file>
+    <file>rocket.png</file>
+    <file>grass_texture.png</file>
+    <file>asphalt.png</file>
+</qresource>
+</RCC>

@@ -113,90 +113,90 @@ public:
         setWindowTitle("airsim");
 
         // загрузка спрайтов игрока
-        su27Sprite.load("plane.png");
+        su27Sprite.load(":/plane.png");
         if (!su27Sprite.isNull()) {
             su27Sprite = su27Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        su30Sprite.load("plane1.png");
+        su30Sprite.load(":/plane1.png");
         if (!su30Sprite.isNull()) {
             su30Sprite = su30Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        su33Sprite.load("plane6.png");
+        su33Sprite.load(":/plane6.png");
         if (!su33Sprite.isNull()) {
             su33Sprite = su33Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        su25Sprite.load("plane4.png");
+        su25Sprite.load(":/plane4.png");
         if (!su25Sprite.isNull()) {
             su25Sprite = su25Sprite.scaled(85, 85, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        su34Sprite.load("plane2.png");
+        su34Sprite.load(":/plane2.png");
         if (!su34Sprite.isNull()) {
             su34Sprite = su34Sprite.scaled(130, 130, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        su57Sprite.load("plane3.png");
+        su57Sprite.load(":/plane3.png");
         if (!su57Sprite.isNull()) {
             su57Sprite = su57Sprite.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        mig31Sprite.load("plane5.png");
+        mig31Sprite.load(":/plane5.png");
         if (!mig31Sprite.isNull()) {
             mig31Sprite = mig31Sprite.scaled(110, 110, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         // загрузка вражеских спрайтов
-        eurofighterSprite.load("EF.png");
+        eurofighterSprite.load(":/EF.png");
         if (!eurofighterSprite.isNull()) {
             eurofighterSprite = eurofighterSprite.scaled(95, 95, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        f18Sprite.load("f18.png");
+        f18Sprite.load(":/f18.png");
         if (!f18Sprite.isNull()) {
             f18Sprite = f18Sprite.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        grassTexture.load("grass_texture.png");
+        grassTexture.load(":/grass_texture.png");
         if (!grassTexture.isNull()) {
             grassTexture = grassTexture.scaled(128, 128, Qt::KeepAspectRatio);
         }
 
-        asphaltTexture.load("asphalt.png");
+        asphaltTexture.load(":/asphalt.png");
         if (!asphaltTexture.isNull()) {
             asphaltTexture = asphaltTexture.scaled(128, 128, Qt::KeepAspectRatio);
         }
 
-        tankSprite.load("tank.png");
+        tankSprite.load(":/tank.png");
         if (!tankSprite.isNull()) {
             tankSprite = tankSprite.scaled(50, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        AASprite.load("AA.png");
+        AASprite.load(":/AA.png");
         if (!AASprite.isNull()) {
             AASprite = AASprite.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        treeSprite.load("tree.png");
+        treeSprite.load(":/tree.png");
         if (!treeSprite.isNull()) {
             treeSprite = treeSprite.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        rocketSprite.load("rocket.png");
+        rocketSprite.load(":/rocket.png");
         if (!rocketSprite.isNull()) {
             rocketSprite = rocketSprite.scaled(40, 30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         // настройка магазина
-        skins.append({"СУ-27", 0, 2, 0, 0, 3.0f, true, "plane.png"});
-        skins.append({"СУ-30", 2000, 3, 10, 0, 3.0f, false, "plane1.png"});
-        skins.append({"СУ-33", 2500, 3, 15, 30, 3.5f, false, "plane6.png"});
-        skins.append({"СУ-34", 3000, 3, 15, 40, 2.5f, false, "plane2.png"});
-        skins.append({"СУ-25", 3500, 2, 25, 50, 2.5f, false, "plane4.png"});
-        skins.append({"СУ-57", 5000, 5, 20, 60, 4.0f, false, "plane3.png"});
-        skins.append({"МиГ-31", 10000, 10, 20, 70, 3.0f, false, "plane5.png"});
+        skins.append({"СУ-27", 0, 2, 0, 0, 3.0f, true, ":/plane.png"});
+        skins.append({"СУ-30", 2000, 3, 10, 0, 3.0f, false, ":/plane1.png"});
+        skins.append({"СУ-33", 2500, 3, 15, 30, 3.5f, false, ":/plane6.png"});
+        skins.append({"СУ-34", 3000, 3, 15, 40, 2.5f, false, ":/plane2.png"});
+        skins.append({"СУ-25", 3500, 2, 25, 50, 2.5f, false, ":/plane4.png"});
+        skins.append({"СУ-57", 5000, 5, 20, 60, 4.0f, false, ":/plane3.png"});
+        skins.append({"МиГ-31", 10000, 10, 20, 70, 3.0f, false, ":/plane5.png"});
 
         loadMoney();
         loadHangar();
@@ -1181,7 +1181,6 @@ private slots:
             armor = 100 + skins[currentPlane].armorBonus;
             money += 50;
 
-            // СБРАСЫВАЕМ ОТКАЗ ГИДРОСИСТЕМ ПРИ ПОСАДКЕ
             hydraulicFailure = false;
             hydraulicTimer = 0;
 
