@@ -15,5 +15,6 @@
     <file>rocket.png</file>
     <file>grass_texture.png</file>
     <file>asphalt.png</file>
+    <file>forsage.png</file>
 </qresource>
 </RCC>
